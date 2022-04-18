@@ -22,7 +22,7 @@ def index():
 def user(name):
     return f"Hello {name}"
 
-@app.route("/admin")
+@app.route("/adminadmin")
 def admin():
     return redirect(url_for("/"))
 
