@@ -24,7 +24,8 @@ def user(name):
 
 @app.route("/adminadmin")
 def admin():
-    return redirect(url_for("/"))
+    #return redirect(url_for("/"))
+    return redirect(url_for('/'))
 
 
 if __name__ == "__main__":
