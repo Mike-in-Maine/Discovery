@@ -17,9 +17,9 @@ df = pd.read_xml('C:/Users/gratt/Dropbox/inventory/xml_inventory/file10.xml')
 df_dhl = pd.read_csv('C:/Users/gratt/Dropbox/inventory/ShippingRatesFiles/csv/DHL.csv')
 df_ids = pd.read_csv('C:/Users/gratt/Dropbox/inventory/ShippingRatesFiles/csv/IDS.csv')
 df_apc = pd.read_csv('C:/Users/gratt/Dropbox/inventory/ShippingRatesFiles/csv/APCDDU.csv')
-w = 66
+w = 160
 
-country = 'AU'
+country = 'GB'
 try:
     print('DHL:',df_dhl.loc[w][country])
     print('IDS:', df_ids.loc[w][country] + 1.80 + 1.60 + 0.10, '\n', 'DHL:', df_dhl.loc[w][country], '\n', 'APC:',df_apc.loc[w][country])
