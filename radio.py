@@ -130,7 +130,7 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
     stsus_code = []
     extra_item_shipping = []
     first_item_shipping = []
-
+    new_used= []
     max_delivery_days = []
     min_deliver_days = []
     tracking = []
@@ -153,6 +153,8 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
             pattern = r'^M|_11|_4$'
             string = re.sub(pattern, '', isbn)
             print(string)
+            pattern_new = '^M|_11|_4$'
+            if re.sub()
             isbns.append(string)
 
         for order_date in po.iter('orderDate'):
@@ -210,7 +212,7 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
     print(order_months)
     print(order_years)
     print(isbns)
-    check_bookfinder(isbns)
+    #check_bookfinder(isbns)
     #to add:
 
     print(len(buyer_purchase_order_ids))
@@ -242,7 +244,7 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
     #    labelstreet = Label(text=street, font=('bold', 2))#.grid(column=2, row=0, padx=5, pady=5)
     #    labelstreet.pack()
 
-    dict = {'ABEPOID': purchase_order_item_ids, 'SHIPTONAME': names, 'SHIPTOCOUNTRY': countrys}
+    dict = {'ISBN': isbns, 'SHIPTONAME': names, 'SHIPTOCOUNTRY': countrys}
 
     df = pd.DataFrame(dict)
     print(df)
