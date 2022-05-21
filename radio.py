@@ -23,12 +23,15 @@ c = conn.cursor()
 
 c.execute("SELECT * FROM new_orders")
 records = c.fetchall()
+print(records[0][1])
+print(type(records))
 number_orders = 0
 order_numbers = ''
 ship_to_names = ''
 ship_to_countrys = ''
 
 for record in records:
+    single_order = str(record[1])
     order_numbers += str(record[1]) + "\n"
     ship_to_names += str(record[2]) + "\n"
     ship_to_countrys += str(record[3]) + "\n"
@@ -37,8 +40,10 @@ f = font.Font(size=9)
 number_orders = Label(root, text="You have " + str(len(records)) + " new orders to process" ,bg='#9FD996',font= 'Helvetica')
 number_orders['font'] = f
 number_orders.grid(row=0, column=0, columnspan=20, sticky='w', pady=10)
-
-order = Label(root, text=order_numbers, bg='#9FD996', font="Helvetica")
+#for record in records:
+order_new = str(record)
+order = Label(root, text=order_numbers, bg='#9FD996', font="Helvetica", cursor='hand2')
+order.bind("<Button-1>", lambda e: callback(single_order))
 order['font'] = f
 order.grid(row=1, column=0, sticky='e',pady=10)
 
@@ -64,7 +69,7 @@ country.grid(sticky='e', row=1, column=2)
 #c.execute("CREATE TABLE orders")
 
 def callback(url):
-    webbrowser.open_new(url)
+    webbrowser.open_new(f'https://www.bookfinder.com/search/?author=&title=&lang=en&isbn={url}&new_used=*&destination=us&currency=USD&mode=basic&st=sr&ac=qr')
 
 def check_bookfinder(isbns):
     #cursor = sqlalchemy.create_engine
