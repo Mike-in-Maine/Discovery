@@ -10,6 +10,7 @@ import untangle
 import sqlalchemy
 from tkinter import font
 import re
+import webbrowser
 import urllib
 
 engine = sqlalchemy.create_engine('mysql+pymysql://miky1973:itff2020@mysql.irish-booksellers.com:3306/irishbooksellers')
@@ -35,19 +36,21 @@ for record in records:
 f = font.Font(size=9)
 number_orders = Label(root, text="You have " + str(len(records)) + " new orders to process" ,bg='#9FD996',font= 'Helvetica')
 number_orders['font'] = f
-number_orders.grid(row=0, column=1, columnspan=20, sticky='w')
+number_orders.grid(row=0, column=0, columnspan=20, sticky='w', pady=10)
 
-order = Label(root, text=order_numbers, bg='#9FD996', font="Helvetica", )
+order = Label(root, text=order_numbers, bg='#9FD996', font="Helvetica")
 order['font'] = f
-order.grid(row=1, column=1, sticky='e',)
+order.grid(row=1, column=0, sticky='e',pady=10)
 
-name = Label(root, text=ship_to_names)
+name = Label(root, text=ship_to_names, bg='#9FD996')
 name['font'] = f
-name.grid(row=1, column=2, sticky='w')
+name.grid(row=1, column=1, sticky='e')
 
-country = Label(root, text=ship_to_countrys)
+country = Label(root, text=ship_to_countrys, bg='#9FD996')
 country['font'] = f
-country.grid(row=1, column=3)
+country.grid(sticky='e', row=1, column=2)
+
+
 
 #check_bookfinder()
 
@@ -59,6 +62,10 @@ country.grid(row=1, column=3)
 #f_name_label.grid(row=0, column=1)
 
 #c.execute("CREATE TABLE orders")
+
+def callback(url):
+    webbrowser.open_new(url)
+
 def check_bookfinder(isbns):
     #cursor = sqlalchemy.create_engine
     df = pd.DataFrame()
@@ -152,9 +159,14 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
             isbn = po5.find('vendorKey').text
             pattern = r'^M|_11|_4$'
             string = re.sub(pattern, '', isbn)
-            print(string)
-            pattern_new = '^M|_11|_4$'
-            if re.sub()
+            #print(string)
+            pattern_new = '_4$'
+            if re.search(pattern_new, isbn):
+                new_used.append("used")
+                print(isbn, " is used")
+            else:
+                new_used.append("new")
+                print(isbn, " is new" )
             isbns.append(string)
 
         for order_date in po.iter('orderDate'):
@@ -212,6 +224,7 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
     print(order_months)
     print(order_years)
     print(isbns)
+    print(new_used)
     #check_bookfinder(isbns)
     #to add:
 
@@ -231,6 +244,7 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
     print(len(order_months))
     print(len(order_years))
     print(len(isbns))
+    print(len(new_used))
 
 
 
@@ -254,7 +268,9 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
 
 get_abe_API_neworders()
 
-
+link1 = Label(root, text="Google Hyperlink", fg="blue", cursor="arrow")
+link1.bind("<Button-1>", lambda e: callback("http://www.google.com"))
+link1.grid(row=2, column=0, sticky='w')
 
 conn.commit()
 conn.close()
