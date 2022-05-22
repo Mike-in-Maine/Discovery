@@ -1,3 +1,4 @@
+import itertools
 from tkinter import *
 from PIL import ImageTk, Image
 from tkinter import filedialog
@@ -12,6 +13,7 @@ from tkinter import font
 import re
 import webbrowser
 import urllib
+from itertools import count
 
 engine = sqlalchemy.create_engine('mysql+pymysql://miky1973:itff2020@mysql.irish-booksellers.com:3306/irishbooksellers')
 root = Tk()
@@ -41,11 +43,27 @@ number_orders = Label(root, text="You have " + str(len(records)) + " new orders 
 number_orders['font'] = f
 number_orders.grid(row=0, column=0, columnspan=20, sticky='w', pady=10)
 #for record in records:
-order_new = str(record)
-order = Label(root, text=order_numbers, bg='#9FD996', font="Helvetica", cursor='hand2')
-order.bind("<Button-1>", lambda e: callback(single_order))
-order['font'] = f
-order.grid(row=1, column=0, sticky='e',pady=10)
+
+
+
+for count, record in enumerate(records):
+    #print(count, record)
+#------------------------
+    obj = record[1]
+    row = count+1
+    print(obj)
+    order = Label(root, text=obj, bg='#9FD996', font="Helvetica", cursor='hand2')
+    order['font'] = f
+    order.bind("<Button-1>", lambda obj=obj: callback(obj)), #lambda e: callback(obj))
+    #lambda i=i: callback(obj)
+    order.grid(row=row, column=0, sticky='e', pady = 0)
+#------------------------
+
+
+#order = Label(root, text=order_numbers, bg='#9FD996', font="Helvetica", cursor='hand2')
+#order.bind("<Button-1>", lambda e: callback(single_order))
+#order['font'] = f
+#order.grid(row=1, column=0, sticky='e',pady=10)
 
 name = Label(root, text=ship_to_names, bg='#9FD996')
 name['font'] = f
@@ -68,8 +86,8 @@ country.grid(sticky='e', row=1, column=2)
 
 #c.execute("CREATE TABLE orders")
 
-def callback(url):
-    webbrowser.open_new(f'https://www.bookfinder.com/search/?author=&title=&lang=en&isbn={url}&new_used=*&destination=us&currency=USD&mode=basic&st=sr&ac=qr')
+def callback(obj):
+    webbrowser.open_new(f'https://www.bookfinder.com/search/?author=&title=&lang=en&isbn={obj}&new_used=*&destination=us&currency=USD&mode=basic&st=sr&ac=qr')
 
 def check_bookfinder(isbns):
     #cursor = sqlalchemy.create_engine
