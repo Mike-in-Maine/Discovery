@@ -14,9 +14,11 @@ import re
 import webbrowser
 import urllib
 from itertools import count
+from bs4 import BeautifulSoup
 
 engine = sqlalchemy.create_engine('mysql+pymysql://miky1973:itff2020@mysql.irish-booksellers.com:3306/irishbooksellers')
 root = Tk()
+root.update_idletasks()
 root.title('Learn radio buttons')
 root.geometry("600x1200")
 root.config(bg='#9FD996')
@@ -25,6 +27,7 @@ c = conn.cursor()
 
 c.execute("SELECT * FROM new_orders")
 records = c.fetchall()
+
 print(records[0][1])
 print(type(records))
 number_orders = 0
@@ -39,55 +42,34 @@ for record in records:
     ship_to_countrys += str(record[3]) + "\n"
 #print(len(records))
 f = font.Font(size=9)
-number_orders = Label(root, text="You have " + str(len(records)) + " new orders to process" ,bg='#9FD996',font= 'Helvetica')
+border = 1
+number_orders = Label(root, text="You have " + str(len(records)) + " new orders to process" ,bg='#9FD996',font= 'Helvetica',border = 1)
 number_orders['font'] = f
 number_orders.grid(row=0, column=0, columnspan=20, sticky='w', pady=10)
-#for record in records:
-
-
 
 for count, record in enumerate(records):
-    #print(count, record)
-#------------------------
-    obj = record[1]
+
+    obj_order = record[1]
+    obj_name = record[2]
+    obj_country = record[3]
     row = count+1
-    print(obj)
-    order = Label(root, text=obj, bg='#9FD996', font="Helvetica", cursor='hand2')
+    print(obj_order)
+
+    order = Button(root, text = obj_order, command=lambda x=record[1]: callback(x)) #lambda e: callback(obj))
+
     order['font'] = f
-    order.bind("<Button-1>", lambda obj=obj: callback(obj)), #lambda e: callback(obj))
-    #lambda i=i: callback(obj)
-    order.grid(row=row, column=0, sticky='e', pady = 0)
-#------------------------
+    order.grid(row=row, column=0, sticky='e', pady = 0,)
 
+    name = Label(root, text=obj_name, bg='#9FD996')
+    name['font'] = f
+    name.grid(row=row, column=1, sticky='w')
 
-#order = Label(root, text=order_numbers, bg='#9FD996', font="Helvetica", cursor='hand2')
-#order.bind("<Button-1>", lambda e: callback(single_order))
-#order['font'] = f
-#order.grid(row=1, column=0, sticky='e',pady=10)
+    country = Label(root, text=obj_country, bg='#9FD996')
+    country['font'] = f
+    country.grid(sticky='e', row=row, column=2)
 
-name = Label(root, text=ship_to_names, bg='#9FD996')
-name['font'] = f
-name.grid(row=1, column=1, sticky='e')
-
-country = Label(root, text=ship_to_countrys, bg='#9FD996')
-country['font'] = f
-country.grid(sticky='e', row=1, column=2)
-
-
-
-#check_bookfinder()
-
-#print(records)
-
-#f_name = Entry(root, width=30)
-#f_name.grid(row = 0, column = 1, padx = 20)
-#f_name_label = Label(root, text='First name')
-#f_name_label.grid(row=0, column=1)
-
-#c.execute("CREATE TABLE orders")
-
-def callback(obj):
-    webbrowser.open_new(f'https://www.bookfinder.com/search/?author=&title=&lang=en&isbn={obj}&new_used=*&destination=us&currency=USD&mode=basic&st=sr&ac=qr')
+def callback(x):
+    webbrowser.open_new(f'https://www.bookfinder.com/search/?author=&title=&lang=en&isbn={x}&new_used=*&destination=us&currency=USD&mode=basic&st=sr&ac=qr')
 
 def check_bookfinder(isbns):
     #cursor = sqlalchemy.create_engine
@@ -104,7 +86,6 @@ def check_bookfinder(isbns):
         #print(df)
         #print(type(url))
         print(response.text)
-
 
 def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in a sqlite3 database by replacing the one that is there.
     pd.set_option('display.max_rows', None)
@@ -281,7 +262,7 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
     #    labelstreet = Label(text=street, font=('bold', 2))#.grid(column=2, row=0, padx=5, pady=5)
     #    labelstreet.pack()
 
-    dict = {'ISBN': isbns, 'SHIPTONAME': names, 'SHIPTOCOUNTRY': countrys}
+    dict = {'ISBN': isbns, 'CONDITION': new_used, 'SHIPTONAME': names, 'SHIPTOCOUNTRY': countrys}
 
     df = pd.DataFrame(dict)
     print(df)
@@ -291,12 +272,9 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
 
 get_abe_API_neworders()
 
-link1 = Label(root, text="Google Hyperlink", fg="blue", cursor="arrow")
-link1.bind("<Button-1>", lambda e: callback("http://www.google.com"))
-link1.grid(row=2, column=0, sticky='w')
-
 conn.commit()
 conn.close()
+
 mainloop()
 
 
