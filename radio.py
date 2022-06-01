@@ -5,6 +5,8 @@ from tkinter import filedialog
 import sqlite3
 import pandas as pd
 import requests
+from requests_html import HTMLSession
+from requests_html import HTML
 import xml.etree.ElementTree as ET
 import xmltodict, json
 import untangle
@@ -13,85 +15,76 @@ from tkinter import font
 import re
 import webbrowser
 import urllib
+import colorama
+from lxml import etree
+from colorama import Fore
 from itertools import count
 from bs4 import BeautifulSoup
+import time
 
-engine = sqlalchemy.create_engine('mysql+pymysql://miky1973:itff2020@mysql.irish-booksellers.com:3306/irishbooksellers')
-root = Tk()
-root.update_idletasks()
-root.title('Learn radio buttons')
-root.geometry("600x1200")
-root.config(bg='#9FD996')
-conn = sqlite3.connect('orders_database.db')
-c = conn.cursor()
+def getWeight_one(x):
 
-c.execute("SELECT * FROM new_orders")
-records = c.fetchall()
+    url1 = f'https://www.amazon.com/dp/{x}'
+    #url = urllib.parse.quote(url1)
+    print("WORKINK ON:", x)
+    #print(url1)
+    response = requests.get("http://api.scrape.do?token=9c904d30b8d747ee93dcfe615ac0552e0cb72ba2d82&url=" + url1).text
+    #print(response)
+    html = HTML(html=response)
+    try:
+        match = html.xpath('// *[ @ id = "detailBulletsWrapper_feature_div"]')
+        match2 = html.xpath('//*[@id="detailBullets_feature_div"]/ul/li[6]/span/span[2]')
+        weight = match[0].text
+        weight2 = match2[0].text
+        #weights.append(match[0].text)
+    except Exception as e: weight = "Amazon - UNK ", print(e)
 
-print(records[0][1])
-print(type(records))
-number_orders = 0
-order_numbers = ''
-ship_to_names = ''
-ship_to_countrys = ''
+    #Gets weight from isbndb.com
+    try:
+        h = {'Authorization': '46481_38467d2795da46fd550a9b402a4018bc'}
+        resp = requests.get(f"https://api2.isbndb.com/book/{x}", headers=h).text
+        json_dict = json.loads(resp)
 
-for record in records:
-    single_order = str(record[1])
-    order_numbers += str(record[1]) + "\n"
-    ship_to_names += str(record[2]) + "\n"
-    ship_to_countrys += str(record[3]) + "\n"
-#print(len(records))
-f = font.Font(size=9)
-border = 1
-number_orders = Label(root, text="You have " + str(len(records)) + " new orders to process" ,bg='#9FD996',font= 'Helvetica',border = 1)
-number_orders['font'] = f
-number_orders.grid(row=0, column=0, columnspan=20, sticky='w', pady=10)
+    except KeyError as isbnbd: weight_isbndb = 'ISBNDB.com = UNK', print(isbnbd)
 
-for count, record in enumerate(records):
+    print('From Amazon: ',weight)
+    print('\n____________________________')
+    print('From Amazon: ', Fore.LIGHTYELLOW_EX + weight2 + Fore.RESET)
+    print('ISBNDB.com ', json_dict['book']['dimensions'])
 
-    obj_order = record[1]
-    obj_name = record[2]
-    obj_country = record[3]
-    row = count+1
-    print(obj_order)
+def getWeight(isbn):
+    for isbn in isbns:
+        url1 = f'https://www.amazon.com/dp/{isbn}'
+        #url = urllib.parse.quote(url1)
+        print("WORKINK ON:", isbn)
+        #print(url1)
+        response = requests.get("http://api.scrape.do?token=9c904d30b8d747ee93dcfe615ac0552e0cb72ba2d82&url=" + url1).text
+        #print(response)
+        html = HTML(html=response)
+        try:
+            match = html.xpath('//*[@id="detailBullets_feature_div"]/ul/li[6]/span/span[2]')
+            print(match[0].text)
+            weights.append(match[0].text)
+        except Exception as e: print(e)
+    print(weights)
 
-    order = Button(root, text = obj_order, command=lambda x=record[1]: callback(x)) #lambda e: callback(obj))
 
-    order['font'] = f
-    order.grid(row=row, column=0, sticky='e', pady = 0,)
-
-    name = Label(root, text=obj_name, bg='#9FD996')
-    name['font'] = f
-    name.grid(row=row, column=1, sticky='w')
-
-    country = Label(root, text=obj_country, bg='#9FD996')
-    country['font'] = f
-    country.grid(sticky='e', row=row, column=2)
-
-def callback(x):
-    webbrowser.open_new(f'https://www.bookfinder.com/search/?author=&title=&lang=en&isbn={x}&new_used=*&destination=us&currency=USD&mode=basic&st=sr&ac=qr')
-
-def check_bookfinder(isbns):
-    #cursor = sqlalchemy.create_engine
-    df = pd.DataFrame()
-    for book_finder_isbn in isbns:
-        # url1 = 'https://www.amazon.com/Crosshairs-Deception-Ken-Reamy/dp/1606472399/ref=sr_1_1?crid=17JEYCW765CEG&keywords=1606472399&qid=1649268063&s=books&sprefix=1606472399%2Cstripbooks%2C47&sr=1-1'
-        #url1 = f'https://www.bookfinder.com/search/?author=&title=&lang=en&isbn={book_finder_isbn}&new_used=*&destination=us&currency=USD&mode=basic&st=sr&ac=qr'
-        url1 = f'https://www.amazon.com/s?k={book_finder_isbn}'
-
-        url = urllib.parse.quote(url1)
-        #print(url)
-        response = requests.get("http://api.scrape.do?token=9c904d30b8d747ee93dcfe615ac0552e0cb72ba2d82&url=" + url)
-        df = pd.read_html(response.text)
-        #print(df)
-        #print(type(url))
-        print(response.text)
+    #//*[@id="detailBullets_feature_div"]/ul/li[6]/span/span[2]
+    #//*[@id="detailBullets_feature_div"]/ul/li[6]/span/span[2]
+        #print(response)
+        #s = HTMLSession()
+        #r.html.render(sleep=1)
+        #product = {
+            #'weight': response.html.xpath('//*[@id="detailBullets_feature_div"]/ul/li[6]/span/span[2]', first=True)
+        #}
+        #print(isbn, product)
 
 def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in a sqlite3 database by replacing the one that is there.
     pd.set_option('display.max_rows', None)
     pd.set_option('display.max_columns', None)
     pd.set_option('display.width', None)
     df = pd.DataFrame()
+    df1 = pd.DataFrame()
     data = """
     <?xml version="1.0" encoding="ISO-8859-1"?>
     <orderUpdateRequest version="1.1">
@@ -104,6 +97,7 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
     headers = {'username': 'irishbooksellers', 'password': 'ef624a8bd5a843cda651'}
     response = requests.get('https://orderupdate.abebooks.com:10003', data=data, headers=headers)
     #print(response.text)
+
     root = ET.fromstring(response.text)
     dump = xmltodict.parse(response.text)
 
@@ -121,6 +115,7 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
     domain_ids= []
     domain_names = []
     order_days = []
+    titles = []
     # to add:
     order_months = []
     order_years = []
@@ -136,7 +131,7 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
     description = []
     isbns = []
     isbn_clean=[]
-    title = []
+
     vendor_key = []
     stsus_code = []
     extra_item_shipping = []
@@ -167,11 +162,13 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
             pattern_new = '_4$'
             if re.search(pattern_new, isbn):
                 new_used.append("used")
-                print(isbn, " is used")
+                #print(isbn, " is used")
             else:
                 new_used.append("new")
-                print(isbn, " is new" )
+                #print(isbn, " is new" )
             isbns.append(string)
+            title = po5.find('title').text
+            titles.append(title)
 
         for order_date in po.iter('orderDate'):
             for date in order_date.iterfind('date'):
@@ -187,6 +184,8 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
             for po3 in po2.findall('buyer'):
                 for purchaseOrder in po2.iter('purchaseOrder'):
                     purchase_order_item_id = purchaseOrder.get('id')
+                for total in po2.findall('orderTotals'):
+                    print("total = ",total.text) #Doesnt work
 
                 for po5 in po3.findall('email'):
                     emails.append(po5.text)
@@ -229,6 +228,7 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
     print(order_years)
     print(isbns)
     print(new_used)
+    print(titles)
     #check_bookfinder(isbns)
     #to add:
 
@@ -249,6 +249,7 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
     print(len(order_years))
     print(len(isbns))
     print(len(new_used))
+    print(len(titles))
 
 
 
@@ -262,16 +263,153 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
     #    labelstreet = Label(text=street, font=('bold', 2))#.grid(column=2, row=0, padx=5, pady=5)
     #    labelstreet.pack()
 
-    dict = {'ISBN': isbns, 'CONDITION': new_used, 'SHIPTONAME': names, 'SHIPTOCOUNTRY': countrys}
+    dict = {'ISBN': isbns, 'CONDITION': new_used, 'SHIPTONAME': names, 'TITLE': titles, 'SHIPTOCOUNTRY': countrys}
 
     df = pd.DataFrame(dict)
     print(df)
     conn3 = sqlite3.connect('orders_database.db')
-    #df.to_sql(name='new_orders', con=engine, index=False, if_exists='append')
-    df.to_sql(name='new_orders', con = conn3, if_exists='replace') #creates/updates the database locally in sqlite3
+    engine = sqlalchemy.create_engine('mysql+pymysql://miky1973:itff2020@mysql.irish-booksellers.com:3306/irishbooksellers')
+    df.to_sql(name='new_orders', con=conn3, index=False, if_exists='replace')
+    #df.to_sql(name='new_orders', con = engine, if_exists='replace') #creates/updates the database locally in sqlite3
+    ## TODO take all the ISBNs and strat checking availability on bookfinder by calling 'def check_bookfinder(isbns):'
+    #getWeight(isbns)
 
+## TODO def get_abe_FTP_neworders():
 get_abe_API_neworders()
+## TODO
+def scrape_bookfinder_data():
+    #take data from local database orders_database
+    conn3 = sqlite3.connect('orders_database.db')
+    df_orders = pd.read_sql("SELECT ISBN FROM new_orders", conn3)
+    isbns = df_orders["ISBN"].tolist()
+    for isbn in isbns:
+        HEADERS = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36'
+        #time.sleep(3)
+        page = requests.get(f"https://www.bookfinder.com/search/?keywords={isbn}&currency=USD&destination=us&mode=basic&classic=off&ps=tp&lang=en&st=sh&ac=qr&submit=", headers=HEADERS)
 
+        #'//*[@id="bd-isbn"]/div/table/tbody/tr/td[1]' \
+        #'//*[@id="bd-isbn"]/div/table/tbody/tr/td[5]'
+
+        #match_new = html.xpath('//*[@id="bd-isbn"]/div/table/tbody/tr/td[1]')
+        #print('Type', type(match_new))
+        #print(match_new)
+
+        #match_used = html.xpath('//*[@id="bd-isbn"]/div/table/tbody/tr/td[5]')
+        #df_new = pd.DataFrame(match_new)
+        #df_used = pd.DataFrame(match_used)
+        #print('DFNEW', df_new)
+        #print('DFUSED', df_used)
+
+
+
+#scrape_bookfinder_data()
+
+def get_weight(obj_order):
+    h = {'Authorization': '46481_38467d2795da46fd550a9b402a4018bc'}
+    resp = requests.get(f"https://api2.isbndb.com/book/{obj_order}", headers=h)
+    print(resp.json())
+    return resp.json()
+def check_bookfinder(isbns):
+    #cursor = sqlalchemy.create_engine
+    df = pd.DataFrame()
+    for book_finder_isbn in isbns:
+        # url1 = 'https://www.amazon.com/Crosshairs-Deception-Ken-Reamy/dp/1606472399/ref=sr_1_1?crid=17JEYCW765CEG&keywords=1606472399&qid=1649268063&s=books&sprefix=1606472399%2Cstripbooks%2C47&sr=1-1'
+        url1 = f'https://www.bookfinder.com/search/?author=&title=&lang=en&isbn={book_finder_isbn}&new_used=*&destination=us&currency=USD&mode=basic&st=sr&ac=qr'
+        #url1 = f'https://www.amazon.com/s?k={book_finder_isbn}'
+
+        url = urllib.parse.quote(url1)
+        #print(url)
+        response = requests.get("http://api.scrape.do?token=9c904d30b8d747ee93dcfe615ac0552e0cb72ba2d82&url=" + url)
+        df = pd.read_html(response.text)
+        #print(df)
+        #print(type(url))
+        print(response.text)
+
+engine = sqlalchemy.create_engine('mysql+pymysql://miky1973:itff2020@mysql.irish-booksellers.com:3306/irishbooksellers')
+root = Tk()
+
+root.title('Learn radio buttons')
+root.geometry("600x1200")
+root.config(bg='#9FD996')
+conn = sqlite3.connect('orders_database.db')
+c = conn.cursor()
+
+c.execute("SELECT * FROM new_orders")
+records = c.fetchall()
+
+print(records[0][1])
+#print(type(records))
+number_orders = 0
+order_numbers = ''
+ship_to_names = ''
+ship_to_countrys = ''
+
+for record in records:
+    single_order = str(record[1])
+    order_numbers += str(record[1]) + "\n"
+    ship_to_names += str(record[2]) + "\n"
+    ship_to_countrys += str(record[3]) + "\n"
+#print(len(records))
+f = font.Font(size=8)
+border = 1
+number_orders = Label(root, text="You have " + str(len(records)) + " new orders to process" ,bg='#9FD996',font= 'Helvetica',border = 1)
+number_orders['font'] = f
+number_orders.grid(row=0, column=0, columnspan=20, sticky='w', pady=10)
+
+#spinner
+#spinner = ['/oooooo', 'o|ooooo', 'oo\oooo', 'ooo-ooo', 'oooo/oo', 'ooooo|o']
+#for spin in spinner:
+#    spinner_label = Label(root, text=spin,bg='#9FD996',font= 'Helvetica',border = 1)
+#    spinner_label['font'] = f
+#    spinner_label.grid(row=0, column=0, columnspan=20, sticky='e', pady=10)
+
+
+for count, record in enumerate(records):
+
+    obj_order = record[0]
+    obj_condition = record[1]
+    obj_name = record[2]
+    obj_title = record[3]
+    obj_country = record[4]
+    row = count+1
+    #weight = get_weight(obj_order)
+    print(obj_order)
+
+    order = Button(root, text = obj_order, command=lambda x=obj_order: callback(x))
+    order['font'] = f
+    order.grid(row=row, column=0, sticky='e')
+
+    if obj_condition == 'used':
+        condition = Label(root, text=obj_condition, bg='#f29d5c')
+    else:
+        condition = Label(root, text=obj_condition, bg='#9FD996')
+    condition['font'] = f
+    condition.grid(row=row, column=2, sticky='w')
+
+    title = Label(root, text=obj_title, bg='#9FD996')
+    title['font'] = f
+    title.grid(sticky='w', row=row, column=3)
+
+    #name = Label(root, text=obj_name, bg='#9FD996')
+    #name['font'] = f
+    #name.grid(row=row, column=2, sticky='w')
+
+    country = Label(root, text=obj_country, bg='#9FD996')
+    country['font'] = f
+    country.grid(sticky='e', row=row, column=1)
+
+    #weight_book = Label(root, text=weight, bg='#9FD996')
+    #weight_book['font'] = f
+    #weight_book.grid(sticky='e', row=row, column=4)
+
+
+
+def callback(x):
+    webbrowser.open_new(f'https://www.bookfinder.com/search/?author=&title=&lang=en&isbn={x}&new_used=*&destination=us&currency=USD&mode=basic&st=sr&ac=qr')
+    getWeight_one(x)
+
+
+root.update_idletasks()
 conn.commit()
 conn.close()
 
