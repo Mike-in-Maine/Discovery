@@ -2,32 +2,86 @@ from bs4 import BeautifulSoup as bs
 import requests
 import pandas as pd
 import sqlite3
+import urllib
+from urllib import parse
+import urllib.parse
+from urllib.parse import urlparse
 
+from fake_useragent import UserAgent
 conn3 = sqlite3.connect('sellers.db')
 
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', None)
-page = requests.get("https://www.bookfinder.com/search/?keywords=3791355228&currency=USD&destination=us&mode=basic&classic=off&ps=tp&lang=en&st=sh&ac=qr&submit=").text
-soup = bs(page, 'html.parser')
+x = '1887374205'
+#url1 = f"https://www.bookfinder.com/search/?keywords={x}&currency=USD&destination=us&mode=basic&classic=off&ps=tp&lang=en&st=sh&ac=qr&submit="
+#url1 = 'https://www.bookfinder.com/search/?author=&title=&lang=en&new_used=*&destination=us&currency=USD&binding=*&isbn=0810914220&keywords=0810914220&minprice=&maxprice=&publisher=&min_year=&max_year=&mode=advanced&st=sr&ac=qr'
+url1 = f'https://www.bookfinder.com/search/?author=&title=&lang=en&new_used=*&destination=us&currency=USD&binding=*&isbn={x}&keywords=&minprice=&maxprice=&publisher=&min_year=&max_year=&mode=advanced&st=sr&ac=qr'
+
+url = urllib.parse.quote(url1)
+print(url)
+page = requests.get("http://api.scrape.do?token=9c904d30b8d747ee93dcfe615ac0552e0cb72ba2d82&url="+url)
+print(page.text)
+#page = requests.get("https://www.bookfinder.com/search/?keywords=0895581639&currency=USD&destination=us&mode=basic&classic=off&ps=tp&lang=en&st=sh&ac=qr&submit=")
+page2 = page.text
+soup = bs(page2, 'lxml')
 #for tag in soup.find_all(True):
     #print(tag.name)
+prices = []
+sellers = []
+titles = []
 
+prices_bs = soup.find_all(attrs={'class':'results-price'})
+sellers_bs = soup.find_all(attrs={'class':'results-explanatory-text-Logo'})
+marketplaces_bs = soup.find_all('img') #find_all('img')
+
+for price in prices_bs:
+    item = price.get_text()
+    prices.append(item)
+
+for seller in sellers_bs[0::3]:
+    item2 = seller.get_text()
+    sellers.append(item2)
+
+for title in marketplaces_bs[2:]: #The first 2 are not sellers
+    titles.append(title.get('title'))
+
+print(prices)
+print(titles)
+print(sellers)
+
+#sellers = soup.find(attrs={"class": "results-explanatory-text-Logo"})
+print('prices', len(prices))
+print('sellers', len(sellers))
+print('titles', len(titles))
+
+dict = {'Marketplaces': titles, 'Sellers': sellers, 'Prices': prices}
+df = pd.DataFrame(dict)
+print(df)
+df.to_sql(name='sellers_df', con=conn3, index=False, if_exists='replace')
+#df_new.to_csv('C:/Users/gratt/PycharmProjects/Scraping_bookfinder/file.csv')
+#df_new.to_sql(name='sellers_df', con=conn3, index=False, if_exists='replace')
+
+###________ This entire part tries to get data by reading an html with pandas and it doesnt work well
 tables = soup.find_all(attrs={"class": "results-table-Logo"})
-sellers = soup.find(attrs={"class": "results-explanatory-text-Logo"})
-
 for table in tables,:
     #print(table)
     df_new = pd.read_html(str(table))[0]
     df_used = pd.read_html(str(table))[1]
     #print('DFNEW', df_new)
     #print('DFUSED', df_used)
-    name = soup.select(".results-table-LogoRow has-data")
-    print(name)
+
+    #name = soup.select(".results-table-LogoRow has-data")
+    #print(name)
 #print(len(tables))
 #print(soup.prettify())
 #print(df_new.loc[1])
-df_new.to_csv('C:/Users/gratt/PycharmProjects/Scraping_bookfinder/file.csv')
-df_new.to_sql(name='sellers_df', con=conn3, index=False, if_exists='append')
+###_________
+
+
+
+print(prices)
+print(titles)
+print(sellers)
 

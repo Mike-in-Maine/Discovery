@@ -23,20 +23,21 @@ from bs4 import BeautifulSoup
 import time
 
 def getWeight_one(x):
-
     url1 = f'https://www.amazon.com/dp/{x}'
     #url = urllib.parse.quote(url1)
     print("WORKINK ON:", x)
     #print(url1)
     response = requests.get("http://api.scrape.do?token=9c904d30b8d747ee93dcfe615ac0552e0cb72ba2d82&url=" + url1).text
-    #print(response)
+    print(response)
     html = HTML(html=response)
+
     try:
         match = html.xpath('// *[ @ id = "detailBulletsWrapper_feature_div"]')
         match2 = html.xpath('//*[@id="detailBullets_feature_div"]/ul/li[6]/span/span[2]')
-        weight = match[0].text
+        #weight = match[0].text
         weight2 = match2[0].text
-        #weights.append(match[0].text)
+        print('From Amazon: ', weight)
+        print('From Amazon: ', Fore.LIGHTYELLOW_EX + weight2 + Fore.RESET)
     except Exception as e: weight = "Amazon - UNK ", print(e)
 
     #Gets weight from isbndb.com
@@ -44,13 +45,11 @@ def getWeight_one(x):
         h = {'Authorization': '46481_38467d2795da46fd550a9b402a4018bc'}
         resp = requests.get(f"https://api2.isbndb.com/book/{x}", headers=h).text
         json_dict = json.loads(resp)
+        print('\n____________________________')
+        print('ISBNDB.com ', json_dict['book']['dimensions'])
 
     except KeyError as isbnbd: weight_isbndb = 'ISBNDB.com = UNK', print(isbnbd)
 
-    print('From Amazon: ',weight)
-    print('\n____________________________')
-    print('From Amazon: ', Fore.LIGHTYELLOW_EX + weight2 + Fore.RESET)
-    print('ISBNDB.com ', json_dict['book']['dimensions'])
 
 def getWeight(isbn):
     for isbn in isbns:
@@ -285,20 +284,9 @@ def scrape_bookfinder_data():
     for isbn in isbns:
         HEADERS = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36'
         #time.sleep(3)
+
         page = requests.get(f"https://www.bookfinder.com/search/?keywords={isbn}&currency=USD&destination=us&mode=basic&classic=off&ps=tp&lang=en&st=sh&ac=qr&submit=", headers=HEADERS)
 
-        #'//*[@id="bd-isbn"]/div/table/tbody/tr/td[1]' \
-        #'//*[@id="bd-isbn"]/div/table/tbody/tr/td[5]'
-
-        #match_new = html.xpath('//*[@id="bd-isbn"]/div/table/tbody/tr/td[1]')
-        #print('Type', type(match_new))
-        #print(match_new)
-
-        #match_used = html.xpath('//*[@id="bd-isbn"]/div/table/tbody/tr/td[5]')
-        #df_new = pd.DataFrame(match_new)
-        #df_used = pd.DataFrame(match_used)
-        #print('DFNEW', df_new)
-        #print('DFUSED', df_used)
 
 
 
@@ -402,10 +390,10 @@ for count, record in enumerate(records):
     #weight_book['font'] = f
     #weight_book.grid(sticky='e', row=row, column=4)
 
-
-
 def callback(x):
-    webbrowser.open_new(f'https://www.bookfinder.com/search/?author=&title=&lang=en&isbn={x}&new_used=*&destination=us&currency=USD&mode=basic&st=sr&ac=qr')
+    url1 = (f'https://www.bookfinder.com/search/?author=&title=&lang=en&isbn={x}&new_used=*&destination=us&currency=USD&mode=basic&st=sr&ac=qr')
+    url = urllib.parse.quote(url1)
+    webbrowser.open_new("http://api.scrape.do?token=9c904d30b8d747ee93dcfe615ac0552e0cb72ba2d82&url=" + url)
     getWeight_one(x)
 
 
