@@ -1,5 +1,7 @@
 import itertools
 from tkinter import *
+
+import bs4
 from PIL import ImageTk, Image
 from tkinter import filedialog
 import sqlite3
@@ -19,26 +21,27 @@ import colorama
 from lxml import etree
 from colorama import Fore
 from itertools import count
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup as bs
 import time
 
 def getWeight_one(x):
-    url1 = f'https://www.amazon.com/dp/{x}'
+    #url1 = f'https://www.amazon.com/dp/{x}'
     #url = urllib.parse.quote(url1)
     print("WORKINK ON:", x)
     #print(url1)
-    response = requests.get("http://api.scrape.do?token=9c904d30b8d747ee93dcfe615ac0552e0cb72ba2d82&url=" + url1).text
-    print(response)
-    html = HTML(html=response)
+    #response = requests.get("http://api.scrape.do?token=9c904d30b8d747ee93dcfe615ac0552e0cb72ba2d82&url="+url).text
+    #print(response)
+    #soup = bs(response, 'lxml')
+    #print(soup)
 
-    try:
-        match = html.xpath('// *[ @ id = "detailBulletsWrapper_feature_div"]')
-        match2 = html.xpath('//*[@id="detailBullets_feature_div"]/ul/li[6]/span/span[2]')
-        #weight = match[0].text
-        weight2 = match2[0].text
-        print('From Amazon: ', weight)
-        print('From Amazon: ', Fore.LIGHTYELLOW_EX + weight2 + Fore.RESET)
-    except Exception as e: weight = "Amazon - UNK ", print(e)
+    #try:
+    #    match = html.xpath('// *[ @ id = "detailBulletsWrapper_feature_div"]')
+    #    match2 = html.xpath('//*[@id="detailBullets_feature_div"]/ul/li[6]/span/span[2]')
+    #    #weight = match[0].text
+    #    weight2 = match2[0].text
+    #    print('From Amazon: ', weight)
+    #    print('From Amazon: ', Fore.LIGHTYELLOW_EX + weight2 + Fore.RESET)
+    #except Exception as e: weight = "Amazon - UNK ", print(e)
 
     #Gets weight from isbndb.com
     try:
@@ -47,36 +50,27 @@ def getWeight_one(x):
         json_dict = json.loads(resp)
         print('\n____________________________')
         print('ISBNDB.com ', json_dict['book']['dimensions'])
+        print('____________________________')
 
     except KeyError as isbnbd: weight_isbndb = 'ISBNDB.com = UNK', print(isbnbd)
 
-
-def getWeight(isbn):
-    for isbn in isbns:
-        url1 = f'https://www.amazon.com/dp/{isbn}'
-        #url = urllib.parse.quote(url1)
-        print("WORKINK ON:", isbn)
-        #print(url1)
-        response = requests.get("http://api.scrape.do?token=9c904d30b8d747ee93dcfe615ac0552e0cb72ba2d82&url=" + url1).text
-        #print(response)
-        html = HTML(html=response)
+weights = []
+def getWeight_all():
+    conn3 = sqlite3.connect('orders_database.db')
+    df = pd.read_sql('SELECT * FROM new_orders',con=conn3)
+    col_one_list = df['ISBN'].tolist()
+    for isbn in col_one_list:
         try:
-            match = html.xpath('//*[@id="detailBullets_feature_div"]/ul/li[6]/span/span[2]')
-            print(match[0].text)
-            weights.append(match[0].text)
-        except Exception as e: print(e)
+            h = {'Authorization': '46481_38467d2795da46fd550a9b402a4018bc'}
+            resp = requests.get(f"https://api2.isbndb.com/book/{isbn}", headers=h).text
+            json_dict = json.loads(resp)
+            weights.append(json_dict['book']['dimensions'])
+            print('\n____________________________')
+            print('ISBNDB.com ', json_dict['book']['dimensions'])
+            print('____________________________')
+
+        except KeyError as isbnbd: weight_isbndb = 'ISBNDB.com = UNK', print(isbnbd)
     print(weights)
-
-
-    #//*[@id="detailBullets_feature_div"]/ul/li[6]/span/span[2]
-    #//*[@id="detailBullets_feature_div"]/ul/li[6]/span/span[2]
-        #print(response)
-        #s = HTMLSession()
-        #r.html.render(sleep=1)
-        #product = {
-            #'weight': response.html.xpath('//*[@id="detailBullets_feature_div"]/ul/li[6]/span/span[2]', first=True)
-        #}
-        #print(isbn, product)
 
 def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in a sqlite3 database by replacing the one that is there.
     pd.set_option('display.max_rows', None)
@@ -183,8 +177,8 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
             for po3 in po2.findall('buyer'):
                 for purchaseOrder in po2.iter('purchaseOrder'):
                     purchase_order_item_id = purchaseOrder.get('id')
-                for total in po2.findall('orderTotals'):
-                    print("total = ",total.text) #Doesnt work
+                #for total in po2.findall('orderTotals'):
+                    #print("total = ",total.text) #Doesnt work
 
                 for po5 in po3.findall('email'):
                     emails.append(po5.text)
@@ -311,11 +305,11 @@ def check_bookfinder(isbns):
         df = pd.read_html(response.text)
         #print(df)
         #print(type(url))
-        print(response.text)
+        #print(response.text)
 
 engine = sqlalchemy.create_engine('mysql+pymysql://miky1973:itff2020@mysql.irish-booksellers.com:3306/irishbooksellers')
 root = Tk()
-
+getWeight_all()
 root.title('Learn radio buttons')
 root.geometry("600x1200")
 root.config(bg='#9FD996')
@@ -325,18 +319,20 @@ c = conn.cursor()
 c.execute("SELECT * FROM new_orders")
 records = c.fetchall()
 
-print(records[0][1])
+print(records[0])
 #print(type(records))
 number_orders = 0
 order_numbers = ''
 ship_to_names = ''
 ship_to_countrys = ''
+weight_obj = ''
 
 for record in records:
     single_order = str(record[1])
     order_numbers += str(record[1]) + "\n"
     ship_to_names += str(record[2]) + "\n"
     ship_to_countrys += str(record[3]) + "\n"
+    weight_obj += str(record[4]) + "\n"
 #print(len(records))
 f = font.Font(size=8)
 border = 1
@@ -359,9 +355,11 @@ for count, record in enumerate(records):
     obj_name = record[2]
     obj_title = record[3]
     obj_country = record[4]
+    obj_weight = record[4]
+    print(record[4])
     row = count+1
     #weight = get_weight(obj_order)
-    print(obj_order)
+    #print(obj_order)
 
     order = Button(root, text = obj_order, command=lambda x=obj_order: callback(x))
     order['font'] = f
@@ -383,6 +381,10 @@ for count, record in enumerate(records):
     #name.grid(row=row, column=2, sticky='w')
 
     country = Label(root, text=obj_country, bg='#9FD996')
+    country['font'] = f
+    country.grid(sticky='e', row=row, column=1)
+
+    weight = Label(root, text=obj_weight, bg='#9FD996')
     country['font'] = f
     country.grid(sticky='e', row=row, column=1)
 

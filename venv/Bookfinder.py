@@ -1,13 +1,15 @@
 from bs4 import BeautifulSoup as bs
 import requests
 import pandas as pd
+import regex
 import sqlite3
 import urllib
 from urllib import parse
 import urllib.parse
 from urllib.parse import urlparse
-
+from datetime import datetime
 from fake_useragent import UserAgent
+
 conn3 = sqlite3.connect('sellers.db')
 
 
@@ -17,12 +19,12 @@ pd.set_option('display.width', None)
 x = '1887374205'
 #url1 = f"https://www.bookfinder.com/search/?keywords={x}&currency=USD&destination=us&mode=basic&classic=off&ps=tp&lang=en&st=sh&ac=qr&submit="
 #url1 = 'https://www.bookfinder.com/search/?author=&title=&lang=en&new_used=*&destination=us&currency=USD&binding=*&isbn=0810914220&keywords=0810914220&minprice=&maxprice=&publisher=&min_year=&max_year=&mode=advanced&st=sr&ac=qr'
-url1 = f'https://www.bookfinder.com/search/?author=&title=&lang=en&new_used=*&destination=us&currency=USD&binding=*&isbn={x}&keywords=&minprice=&maxprice=&publisher=&min_year=&max_year=&mode=advanced&st=sr&ac=qr'
+url1 = f'https://www.bookfinder.com/search/?keywords={x}&currency=USD&destination=us&mode=basic&classic=off&ps=tp&lang=en&st=sh&ac=qr&submit='
 
 url = urllib.parse.quote(url1)
 print(url)
 page = requests.get("http://api.scrape.do?token=9c904d30b8d747ee93dcfe615ac0552e0cb72ba2d82&url="+url)
-print(page.text)
+#print(page.text)
 #page = requests.get("https://www.bookfinder.com/search/?keywords=0895581639&currency=USD&destination=us&mode=basic&classic=off&ps=tp&lang=en&st=sh&ac=qr&submit=")
 page2 = page.text
 soup = bs(page2, 'lxml')
@@ -34,6 +36,7 @@ titles = []
 
 prices_bs = soup.find_all(attrs={'class':'results-price'})
 sellers_bs = soup.find_all(attrs={'class':'results-explanatory-text-Logo'})
+
 marketplaces_bs = soup.find_all('img') #find_all('img')
 
 for price in prices_bs:
@@ -47,7 +50,7 @@ for seller in sellers_bs[0::3]:
 for title in marketplaces_bs[2:]: #The first 2 are not sellers
     titles.append(title.get('title'))
 
-print(prices)
+print(prices) #These are new and used
 print(titles)
 print(sellers)
 
@@ -56,32 +59,68 @@ print('prices', len(prices))
 print('sellers', len(sellers))
 print('titles', len(titles))
 
-dict = {'Marketplaces': titles, 'Sellers': sellers, 'Prices': prices}
-df = pd.DataFrame(dict)
-print(df)
-df.to_sql(name='sellers_df', con=conn3, index=False, if_exists='replace')
+#dict = {'Marketplaces': titles, 'Sellers': sellers, 'Prices': prices}
+#df = pd.DataFrame(dict)
+## print(df)
+#df.to_sql(name='sellers_df', con=conn3, index=False, if_exists='replace')
+
+
 #df_new.to_csv('C:/Users/gratt/PycharmProjects/Scraping_bookfinder/file.csv')
 #df_new.to_sql(name='sellers_df', con=conn3, index=False, if_exists='replace')
 
 ###________ This entire part tries to get data by reading an html with pandas and it doesnt work well
 tables = soup.find_all(attrs={"class": "results-table-Logo"})
-for table in tables,:
+print(len(tables))
+sellers_bs = soup.find_all(attrs={'class':'results-explanatory-text-Logo'})
+
+
+for title in marketplaces_bs[2:]: #The first 2 are not sellers
+    titles.append(title.get('title'))
+    #print(title)
+
+df_tables = []
+for table in tables:
     #print(table)
-    df_new = pd.read_html(str(table))[0]
-    df_used = pd.read_html(str(table))[1]
+    #marketplaces_used = (str(table))[0].find_all('img')  # find_all('img')
+    #marketplaces_used = table.findAll("img", {"title": regex.compile(r".*")})
+    #print('Marketplaces used', marketplaces_bs)
+
+    df_count_tables = pd.read_html(str(table))
+    print(df_count_tables)
+    df_count_tables.insert(3, 'ISBN', x)# inserts the ISBN column
+    df_count_tables.insert(4, 'CONDITION', 'new')
+    df_count_tables.insert(5, 'TIMESTAMP', datetime.today())
+
+    df_tables.append(df_count_tables)
+    #print(df_new)#(str(table))[0]
+    #df_used = pd.read_html(str(table))
+    #df_mkplc_new = pd.DataFrame(titles)
+   # print(df_new)
+    #print(df_mkplc_new)
+    #regex = ".+?(?=via)"
+
+    #df_new.insert(3, 'MARKETPLACE', titles)
+
     #print('DFNEW', df_new)
     #print('DFUSED', df_used)
 
+    #dict = {'Marketplaces': titles, 'Sellers': sellers, 'Prices': prices}
+    #df = pd.DataFrame(dict)
+    # print(df)
+for hack in df_tables:
+    print(hack)
+#df_used.to_sql(name='sellers_df', con=conn3, index=False, if_exists='append')
+#df_new.to_sql(name='sellers_df', con=conn3, index=False, if_exists='append')
     #name = soup.select(".results-table-LogoRow has-data")
+
     #print(name)
 #print(len(tables))
 #print(soup.prettify())
 #print(df_new.loc[1])
 ###_________
 
-
-
-print(prices)
-print(titles)
-print(sellers)
-
+    print('111111111111111', table[0])
+    print(len(table[0]))
+    print('222222222222222', table[1])
+    print(len(table[1]))
+    print("JEHNYY", str(table[1]))
