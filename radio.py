@@ -54,24 +54,31 @@ def getWeight_one(x):
 
     except KeyError as isbnbd: weight_isbndb = 'ISBNDB.com = UNK', print(isbnbd)
 
-weights = []
 def getWeight_all():
+    weights = []
     conn3 = sqlite3.connect('orders_database.db')
     df = pd.read_sql('SELECT * FROM new_orders',con=conn3)
+    #cursor = conn3.cursor()
+    print(df)
     col_one_list = df['ISBN'].tolist()
     for isbn in col_one_list:
         try:
             h = {'Authorization': '46481_38467d2795da46fd550a9b402a4018bc'}
             resp = requests.get(f"https://api2.isbndb.com/book/{isbn}", headers=h).text
             json_dict = json.loads(resp)
+            weight_line = json_dict['book']['dimensions']
             weights.append(json_dict['book']['dimensions'])
-            print('\n____________________________')
-            print('ISBNDB.com ', json_dict['book']['dimensions'])
-            print('____________________________')
+            #print('\n____________________________')
+            #print('ISBNDB.com ', json_dict['book']['dimensions'])
+            #print('____________________________')
+            ##cursor.execute('UPDATE new_orders SET %s = WEIGHT') %(weight_line)
 
-        except KeyError as isbnbd: weight_isbndb = 'ISBNDB.com = UNK', print(isbnbd)
-    print(weights)
+        except KeyError as isbnbd:
+            #weight_isbndb = 'ISBNDB.com = UNK', print(isbnbd)
+            weights.append('UNK')
 
+    df['WEIGHTS'] = weights
+    df.to_sql(name='new_orders', con=conn3, index=False, if_exists='replace')
 def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in a sqlite3 database by replacing the one that is there.
     pd.set_option('display.max_rows', None)
     pd.set_option('display.max_columns', None)
@@ -246,6 +253,7 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
 
 
 
+
     #for zip in codes:
     #    labelNumberOfOrders = Label(text=zip, font=('bold', 2))
     #    labelNumberOfOrders
@@ -266,10 +274,7 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
     #df.to_sql(name='new_orders', con = engine, if_exists='replace') #creates/updates the database locally in sqlite3
     ## TODO take all the ISBNs and strat checking availability on bookfinder by calling 'def check_bookfinder(isbns):'
     #getWeight(isbns)
-
 ## TODO def get_abe_FTP_neworders():
-get_abe_API_neworders()
-## TODO
 def scrape_bookfinder_data():
     #take data from local database orders_database
     conn3 = sqlite3.connect('orders_database.db')
@@ -280,12 +285,6 @@ def scrape_bookfinder_data():
         #time.sleep(3)
 
         page = requests.get(f"https://www.bookfinder.com/search/?keywords={isbn}&currency=USD&destination=us&mode=basic&classic=off&ps=tp&lang=en&st=sh&ac=qr&submit=", headers=HEADERS)
-
-
-
-
-#scrape_bookfinder_data()
-
 def get_weight(obj_order):
     h = {'Authorization': '46481_38467d2795da46fd550a9b402a4018bc'}
     resp = requests.get(f"https://api2.isbndb.com/book/{obj_order}", headers=h)
@@ -307,9 +306,12 @@ def check_bookfinder(isbns):
         #print(type(url))
         #print(response.text)
 
+get_abe_API_neworders()
+getWeight_all()
+
 engine = sqlalchemy.create_engine('mysql+pymysql://miky1973:itff2020@mysql.irish-booksellers.com:3306/irishbooksellers')
 root = Tk()
-getWeight_all()
+
 root.title('Learn radio buttons')
 root.geometry("600x1200")
 root.config(bg='#9FD996')
@@ -319,7 +321,7 @@ c = conn.cursor()
 c.execute("SELECT * FROM new_orders")
 records = c.fetchall()
 
-print(records[0])
+#print(records[0])
 #print(type(records))
 number_orders = 0
 order_numbers = ''
@@ -356,7 +358,7 @@ for count, record in enumerate(records):
     obj_title = record[3]
     obj_country = record[4]
     obj_weight = record[4]
-    print(record[4])
+    #print(record[4])
     row = count+1
     #weight = get_weight(obj_order)
     #print(obj_order)
