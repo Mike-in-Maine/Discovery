@@ -1,6 +1,5 @@
 import itertools
 from tkinter import *
-
 import bs4
 from PIL import ImageTk, Image
 from tkinter import filedialog
@@ -23,6 +22,7 @@ from colorama import Fore
 from itertools import count
 from bs4 import BeautifulSoup as bs
 import time
+import pyautogui
 
 def getWeight_one(x):
     #url1 = f'https://www.amazon.com/dp/{x}'
@@ -53,13 +53,12 @@ def getWeight_one(x):
         print('____________________________')
 
     except KeyError as isbnbd: weight_isbndb = 'ISBNDB.com = UNK', print(isbnbd)
-
 def getWeight_all():
     weights = []
     conn3 = sqlite3.connect('orders_database.db')
     df = pd.read_sql('SELECT * FROM new_orders',con=conn3)
     #cursor = conn3.cursor()
-    print(df)
+    #print(df)
     col_one_list = df['ISBN'].tolist()
     for isbn in col_one_list:
         try:
@@ -67,15 +66,16 @@ def getWeight_all():
             resp = requests.get(f"https://api2.isbndb.com/book/{isbn}", headers=h).text
             json_dict = json.loads(resp)
             weight_line = json_dict['book']['dimensions']
-            weights.append(json_dict['book']['dimensions'])
-            #print('\n____________________________')
-            #print('ISBNDB.com ', json_dict['book']['dimensions'])
-            #print('____________________________')
-            ##cursor.execute('UPDATE new_orders SET %s = WEIGHT') %(weight_line)
 
+            #weights.append(weight_only)
+            weights.append(json_dict['book']['dimensions'])
+            #print(weight_only[0])
         except KeyError as isbnbd:
-            #weight_isbndb = 'ISBNDB.com = UNK', print(isbnbd)
             weights.append('UNK')
+    #weights_only = []
+    #for i in weights:
+    #    weight_only = re.findall(r"(?<=Weight: )\d+.\d+ \w+", i)
+    #    weights_only.append(weight_only)
 
     df['WEIGHTS'] = weights
     df.to_sql(name='new_orders', con=conn3, index=False, if_exists='replace')
@@ -264,7 +264,7 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
     #    labelstreet = Label(text=street, font=('bold', 2))#.grid(column=2, row=0, padx=5, pady=5)
     #    labelstreet.pack()
 
-    dict = {'ISBN': isbns, 'CONDITION': new_used, 'SHIPTONAME': names, 'TITLE': titles, 'SHIPTOCOUNTRY': countrys}
+    dict = {'ABEPOID':purchase_order_item_ids, 'ISBN': isbns, 'CONDITION': new_used, 'SHIPTONAME': names, 'SHIPTOADDRESS': streets, 'SHIPTOADDRESS2': street2s, 'SHIPTOCITY': cities, 'SHIPTOPROVSTATE': regions, 'SHIPTOZIPCODE': codes, 'SHIPTOCOUNTRY': countrys, 'TITLE': titles, 'BUYEREMAILADDRESS': emails}
 
     df = pd.DataFrame(dict)
     print(df)
@@ -320,55 +320,59 @@ c = conn.cursor()
 
 c.execute("SELECT * FROM new_orders")
 records = c.fetchall()
-
-#print(records[0])
-#print(type(records))
+print(records[0])
 number_orders = 0
 order_numbers = ''
 ship_to_names = ''
 ship_to_countrys = ''
 weight_obj = ''
+ship_to_address1 = ''
+ship_to_address2 = ''
+ship_to_zip = ''
+ship_to_state = ''
+
 
 for record in records:
     single_order = str(record[1])
-    order_numbers += str(record[1]) + "\n"
-    ship_to_names += str(record[2]) + "\n"
-    ship_to_countrys += str(record[3]) + "\n"
-    weight_obj += str(record[4]) + "\n"
+    order_numbers += str(record[2]) + "\n"
+    ship_to_names += str(record[3]) + "\n"
+    ship_to_countrys += str(record[4]) + "\n"
+    weight_obj += str(record[5]) + "\n"
 #print(len(records))
+
+#weights_only = re.findall(r"(?<=Weight: )\d+[.]\d+ \w+", weight_obj)
+
+
+
 f = font.Font(size=8)
 border = 1
 number_orders = Label(root, text="You have " + str(len(records)) + " new orders to process" ,bg='#9FD996',font= 'Helvetica',border = 1)
 number_orders['font'] = f
 number_orders.grid(row=0, column=0, columnspan=20, sticky='w', pady=10)
 
-#spinner
-#spinner = ['/oooooo', 'o|ooooo', 'oo\oooo', 'ooo-ooo', 'oooo/oo', 'ooooo|o']
-#for spin in spinner:
-#    spinner_label = Label(root, text=spin,bg='#9FD996',font= 'Helvetica',border = 1)
-#    spinner_label['font'] = f
-#    spinner_label.grid(row=0, column=0, columnspan=20, sticky='e', pady=10)
-
-
 for count, record in enumerate(records):
-
     obj_order = record[0]
-    obj_condition = record[1]
-    obj_name = record[2]
-    obj_title = record[3]
-    obj_country = record[4]
-    obj_weight = record[4]
+    obj_isbn = record[1]
+    obj_condition = record[2]
+    obj_name = record[3]
+    obj_title = record[10]
+    obj_country = record[9]
+    obj_weight = record[12]
     #print(record[4])
     row = count+1
     #weight = get_weight(obj_order)
     #print(obj_order)
 
-    order = Button(root, text = obj_order, command=lambda x=obj_order: callback(x))
+    order = Button(root, text = obj_order, command=lambda x=obj_isbn: open_biblio_url(x))
     order['font'] = f
     order.grid(row=row, column=0, sticky='e')
 
+    process_biblio = Button(root, text = 'BBL', command = lambda x=obj_order: process_from_BIBLIO(x), bg = '#C17A6B')
+    process_biblio['font'] = f
+    process_biblio.grid(row=row, column=1, sticky='w')
+
     if obj_condition == 'used':
-        condition = Label(root, text=obj_condition, bg='#f29d5c')
+        condition = Label(root, text=obj_condition, foreground='#f29d5c', background='#9FD996')
     else:
         condition = Label(root, text=obj_condition, bg='#9FD996')
     condition['font'] = f
@@ -384,21 +388,47 @@ for count, record in enumerate(records):
 
     country = Label(root, text=obj_country, bg='#9FD996')
     country['font'] = f
-    country.grid(sticky='e', row=row, column=1)
+    country.grid(sticky='e', row=row, column=7)
 
+    #obj_weight1 = re.findall(r"(?<=Weight: )\d+[.]\d+ \w+", obj_weight)
     weight = Label(root, text=obj_weight, bg='#9FD996')
-    country['font'] = f
-    country.grid(sticky='e', row=row, column=1)
+    weight['font'] = f
+    weight.grid(sticky='w', row=row, column=4)
+
+    r1 = Radiobutton(root, text="PRCS", value=0, variable=1)
+    r2 = Radiobutton()
+    r1.grid(sticky='w', row=row, column=8)
 
     #weight_book = Label(root, text=weight, bg='#9FD996')
     #weight_book['font'] = f
     #weight_book.grid(sticky='e', row=row, column=4)
 
-def callback(x):
+def open_biblio_url(x):
     url1 = (f'https://www.bookfinder.com/search/?author=&title=&lang=en&isbn={x}&new_used=*&destination=us&currency=USD&mode=basic&st=sr&ac=qr')
     url = urllib.parse.quote(url1)
     webbrowser.open_new("http://api.scrape.do?token=9c904d30b8d747ee93dcfe615ac0552e0cb72ba2d82&url=" + url)
-    getWeight_one(x)
+
+def process_from_BIBLIO(x):
+    conn = sqlite3.connect('orders_database.db')
+    #c = conn.cursor()
+    #c.execute("SELECT * FROM new_orders")
+    #records = c.fetchall()
+    #print(records)
+    df = pd.read_sql(f"SELECT * FROM new_orders WHERE ABEPOID is {x}", con = conn)
+    ship_to_name = df.iloc[0]['SHIPTONAME']+" {NO INVOICE}"
+    print(ship_to_name)
+    res = pyautogui.locateOnScreen('pictures/biblio/proceed_to_checkout.PNG')
+
+    pyautogui.click(res)
+    go_to_checkout = pyautogui.center(res)
+    time.sleep(1)
+    pyautogui.moveTo(go_to_checkout)
+    time.sleep(1)
+    pyautogui.click()
+
+    print(df)
+
+    conn.close()
 
 
 root.update_idletasks()

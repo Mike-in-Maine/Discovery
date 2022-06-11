@@ -16,13 +16,14 @@ conn3 = sqlite3.connect('sellers.db')
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', None)
-x = '1887374205'
+x = '0873481291'
 #url1 = f"https://www.bookfinder.com/search/?keywords={x}&currency=USD&destination=us&mode=basic&classic=off&ps=tp&lang=en&st=sh&ac=qr&submit="
 #url1 = 'https://www.bookfinder.com/search/?author=&title=&lang=en&new_used=*&destination=us&currency=USD&binding=*&isbn=0810914220&keywords=0810914220&minprice=&maxprice=&publisher=&min_year=&max_year=&mode=advanced&st=sr&ac=qr'
-url1 = f'https://www.bookfinder.com/search/?keywords={x}&currency=USD&destination=us&mode=basic&classic=off&ps=tp&lang=en&st=sh&ac=qr&submit='
+#f'https://www.bookfinder.com/search/?keywords={x}&currency=USD&destination=us&mode=basic&classic=off&ps=tp&lang=en&st=sh&ac=qr&submit='
+url1 = f'https://www.bookfinder.com/search/?author=&title=&lang=en&isbn={x}&destination=us&currency=USD&mode=basic&st=sr&ac=qr'
 
 url = urllib.parse.quote(url1)
-print(url)
+#print(url)
 page = requests.get("http://api.scrape.do?token=9c904d30b8d747ee93dcfe615ac0552e0cb72ba2d82&url="+url)
 #print(page.text)
 #page = requests.get("https://www.bookfinder.com/search/?keywords=0895581639&currency=USD&destination=us&mode=basic&classic=off&ps=tp&lang=en&st=sh&ac=qr&submit=")
@@ -56,13 +57,13 @@ print(sellers)
 
 #sellers = soup.find(attrs={"class": "results-explanatory-text-Logo"})
 print('prices', len(prices))
-print('sellers', len(sellers))
-print('titles', len(titles))
+print('sellers', len(titles))
+print('titles', len(sellers))
 
-#dict = {'Marketplaces': titles, 'Sellers': sellers, 'Prices': prices}
-#df = pd.DataFrame(dict)
-## print(df)
-#df.to_sql(name='sellers_df', con=conn3, index=False, if_exists='replace')
+dict = {'Marketplaces': titles, 'Sellers': sellers, 'Prices': prices}
+df = pd.DataFrame(dict)
+print(df)
+df.to_sql(name='sellers_df', con=conn3, index=False, if_exists='replace')
 
 
 #df_new.to_csv('C:/Users/gratt/PycharmProjects/Scraping_bookfinder/file.csv')
@@ -70,26 +71,29 @@ print('titles', len(titles))
 
 ###________ This entire part tries to get data by reading an html with pandas and it doesnt work well
 tables = soup.find_all(attrs={"class": "results-table-Logo"})
-print(len(tables))
-sellers_bs = soup.find_all(attrs={'class':'results-explanatory-text-Logo'})
+
+print(tables)
+#print(len(tables))
+#print(type(tables))
+#sellers_bs = soup.find_all(attrs={'class':'results-explanatory-text-Logo'})
 
 
-for title in marketplaces_bs[2:]: #The first 2 are not sellers
-    titles.append(title.get('title'))
+#for title in marketplaces_bs[2:]: #The first 2 are not sellers
+    #titles.append(title.get('title'))
     #print(title)
 
 df_tables = []
 for table in tables:
-    #print(table)
-    #marketplaces_used = (str(table))[0].find_all('img')  # find_all('img')
+    marketplaces_used = table.text
+    print(type(marketplaces_used))
     #marketplaces_used = table.findAll("img", {"title": regex.compile(r".*")})
-    #print('Marketplaces used', marketplaces_bs)
+    print('Marketplaces used', marketplaces_used)
 
-    df_count_tables = pd.read_html(str(table))
+    df_count_tables = pd.read_html(table_html)
     print(df_count_tables)
-    df_count_tables.insert(3, 'ISBN', x)# inserts the ISBN column
-    df_count_tables.insert(4, 'CONDITION', 'new')
-    df_count_tables.insert(5, 'TIMESTAMP', datetime.today())
+    df_count_tables.insert(5, 'ISBN', x)# inserts the ISBN column
+    df_count_tables.insert(6, 'CONDITION', 'new')
+    df_count_tables.insert(7, 'TIMESTAMP', datetime.today())
 
     df_tables.append(df_count_tables)
     #print(df_new)#(str(table))[0]
