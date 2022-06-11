@@ -23,6 +23,8 @@ from itertools import count
 from bs4 import BeautifulSoup as bs
 import time
 import pyautogui
+import cv2
+import badpeople
 
 def getWeight_one(x):
     #url1 = f'https://www.amazon.com/dp/{x}'
@@ -410,20 +412,46 @@ def open_biblio_url(x):
 
 def process_from_BIBLIO(x):
     conn = sqlite3.connect('orders_database.db')
-    #c = conn.cursor()
-    #c.execute("SELECT * FROM new_orders")
-    #records = c.fetchall()
-    #print(records)
+
     df = pd.read_sql(f"SELECT * FROM new_orders WHERE ABEPOID is {x}", con = conn)
-    ship_to_name = df.iloc[0]['SHIPTONAME']+" {NO INVOICE}"
-    print(ship_to_name)
-    biblio_checkout = pyautogui.locateOnScreen('pictures/biblio/proceed_to_checkout.PNG')
-    pyautogui.click(x=100, y=100)
-    go_to_checkout = pyautogui.center(biblio_checkout)
-    #time.sleep(1)
-    pyautogui.moveTo(go_to_checkout)
-    time.sleep(1)
+    biblio_abepoid = df.iloc[0]['ABEPOID']
+    biblio_ship_to_name = df.iloc[0]['SHIPTONAME']+" {NO INVOICE}"
+    biblio_ship_to_address = df.iloc[0]['SHIPTOADDRESS']
+    biblio_ship_to_address2 = df.iloc[0]['SHIPTOADDRESS2']
+    biblio_ship_to_city = df.iloc[0]['SHIPTOCITY']
+    biblio_ship_to_state = df.iloc[0]['SHIPTOSTATE']
+    biblio_ship_to_zip = df.iloc[0]['SHIPTOZIPCODE']
+    biblio_ship_to_country = df.iloc[0]['SHIPTOCOUNTRY']
+
+
+    states.get(biblio_ship_to_state)
+    print(biblio_ship_to_state)
+    biblio_checkout_x, biblio_checkout_y = pyautogui.locateCenterOnScreen('pictures/biblio/proceed_to_checkout.PNG', confidence = 0.8)
+    pyautogui.moveTo(biblio_checkout_x-20, biblio_checkout_y)
     pyautogui.click()
+    pyautogui.click()
+    time.sleep(1)
+
+    pyautogui.press("f")
+    pyautogui.press("a")
+    pyautogui.press("e")
+
+    time.sleep(1)
+    pyautogui.hotkey("tab")
+    pyautogui.hotkey("tab")
+    pyautogui.hotkey("tab")
+    pyautogui.hotkey("tab")
+    pyautogui.write(biblio_ship_to_name)
+    pyautogui.hotkey("tab")
+    pyautogui.write(biblio_ship_to_address)
+    pyautogui.hotkey("tab")
+    pyautogui.write(biblio_ship_to_address2)
+    pyautogui.hotkey("tab")
+    pyautogui.write(biblio_ship_to_city)
+    pyautogui.hotkey("tab")
+    pyautogui.write(biblio_ship_to_state)
+    time.sleep(0.5)
+
 
     print(df)
 
