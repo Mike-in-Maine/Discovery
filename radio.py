@@ -417,11 +417,10 @@ def process_from_BIBLIO(x):
     df = pd.read_sql(f"SELECT * FROM new_orders WHERE ABEPOID is {x}", con = conn)
     ship_to_name = df.iloc[0]['SHIPTONAME']+" {NO INVOICE}"
     print(ship_to_name)
-    res = pyautogui.locateOnScreen('pictures/biblio/proceed_to_checkout.PNG')
-
-    pyautogui.click(res)
-    go_to_checkout = pyautogui.center(res)
-    time.sleep(1)
+    biblio_checkout = pyautogui.locateOnScreen('pictures/biblio/proceed_to_checkout.PNG')
+    pyautogui.click(x=100, y=100)
+    go_to_checkout = pyautogui.center(biblio_checkout)
+    #time.sleep(1)
     pyautogui.moveTo(go_to_checkout)
     time.sleep(1)
     pyautogui.click()
