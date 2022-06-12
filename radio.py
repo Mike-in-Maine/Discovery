@@ -256,6 +256,9 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
 
 
 
+
+
+
     #for zip in codes:
     #    labelNumberOfOrders = Label(text=zip, font=('bold', 2))
     #    labelNumberOfOrders
@@ -332,6 +335,7 @@ ship_to_address1 = ''
 ship_to_address2 = ''
 ship_to_zip = ''
 ship_to_state = ''
+ship_to_email = ''
 
 
 for record in records:
@@ -340,6 +344,7 @@ for record in records:
     ship_to_names += str(record[3]) + "\n"
     ship_to_countrys += str(record[4]) + "\n"
     weight_obj += str(record[5]) + "\n"
+    ship_to_email += str(record[6]) + "\n"
 #print(len(records))
 
 #weights_only = re.findall(r"(?<=Weight: )\d+[.]\d+ \w+", weight_obj)
@@ -360,10 +365,16 @@ for count, record in enumerate(records):
     obj_title = record[10]
     obj_country = record[9]
     obj_weight = record[12]
+    obj_email = record[11]
     #print(record[4])
     row = count+1
     #weight = get_weight(obj_order)
     #print(obj_order)
+
+    if obj_email in badpeople.bad_buyers:
+        bad_buyer_color = "#FF808F"
+    else:
+        bad_buyer_color = '#9FD996'
 
     order = Button(root, text = obj_order, command=lambda x=obj_isbn: open_biblio_url(x))
     order['font'] = f
@@ -374,9 +385,9 @@ for count, record in enumerate(records):
     process_biblio.grid(row=row, column=1, sticky='w')
 
     if obj_condition == 'used':
-        condition = Label(root, text=obj_condition, foreground='#f29d5c', background='#9FD996')
+        condition = Label(root, text=obj_condition, foreground='#FF8700', bg=bad_buyer_color)
     else:
-        condition = Label(root, text=obj_condition, bg='#9FD996')
+        condition = Label(root, text=obj_condition, bg=bad_buyer_color)
     condition['font'] = f
     condition.grid(row=row, column=2, sticky='w')
 
@@ -397,7 +408,7 @@ for count, record in enumerate(records):
     weight['font'] = f
     weight.grid(sticky='w', row=row, column=4)
 
-    r1 = Radiobutton(root, text="PRCS", value=0, variable=1)
+    r1 = Radiobutton(root, text=obj_email, value=0, variable=1)
     r2 = Radiobutton()
     r1.grid(sticky='w', row=row, column=8)
 
@@ -419,20 +430,23 @@ def process_from_BIBLIO(x):
     biblio_ship_to_address = df.iloc[0]['SHIPTOADDRESS']
     biblio_ship_to_address2 = df.iloc[0]['SHIPTOADDRESS2']
     biblio_ship_to_city = df.iloc[0]['SHIPTOCITY']
-    biblio_ship_to_state = df.iloc[0]['SHIPTOSTATE']
+    biblio_ship_to_state = df.iloc[0]['SHIPTOPROVSTATE']
     biblio_ship_to_zip = df.iloc[0]['SHIPTOZIPCODE']
     biblio_ship_to_country = df.iloc[0]['SHIPTOCOUNTRY']
 
+    #print(badpeople.states[f"{biblio_ship_to_state}"])
 
-    states.get(biblio_ship_to_state)
+
     print(biblio_ship_to_state)
+    print(type(biblio_ship_to_state))
     biblio_checkout_x, biblio_checkout_y = pyautogui.locateCenterOnScreen('pictures/biblio/proceed_to_checkout.PNG', confidence = 0.8)
     pyautogui.moveTo(biblio_checkout_x-20, biblio_checkout_y)
     pyautogui.click()
     pyautogui.click()
-    time.sleep(1)
+    time.sleep(5)
 
     pyautogui.press("f")
+    time.sleep(1)
     pyautogui.press("a")
     pyautogui.press("e")
 
@@ -441,22 +455,51 @@ def process_from_BIBLIO(x):
     pyautogui.hotkey("tab")
     pyautogui.hotkey("tab")
     pyautogui.hotkey("tab")
-    pyautogui.write(biblio_ship_to_name)
+    try:
+        pyautogui.write(biblio_ship_to_name)
+    except:
+        pass
+    #time.sleep(1)
     pyautogui.hotkey("tab")
-    pyautogui.write(biblio_ship_to_address)
+    try:
+        pyautogui.write(biblio_ship_to_address)
+    except:
+        pass
+    #time.sleep(1)
     pyautogui.hotkey("tab")
-    pyautogui.write(biblio_ship_to_address2)
+    try:
+        pyautogui.write(biblio_ship_to_address2)
+    except:
+        pass
+    #time.sleep(1)
     pyautogui.hotkey("tab")
-    pyautogui.write(biblio_ship_to_city)
+    try:
+        pyautogui.write(biblio_ship_to_city)
+    except:
+        pass
+    #time.sleep(1)
     pyautogui.hotkey("tab")
-    pyautogui.write(biblio_ship_to_state)
-    time.sleep(0.5)
-
-
-    print(df)
-
+    try:
+        pyautogui.write(biblio_ship_to_state)
+    except:
+        pass
+    #time.sleep(1)
+    pyautogui.hotkey("tab")
+    try:
+        pyautogui.write(biblio_ship_to_zip)
+    except:
+        pass
+    time.sleep(1)
+    pyautogui.hotkey("tab")
+    pyautogui.hotkey("tab")
+    pyautogui.hotkey("tab")
+    pyautogui.hotkey("tab")
+    pyautogui.hotkey("enter")
+    #pyautogui.write("k")
+    #biblio_add_address_x, biblio_add_address_y = pyautogui.locateCenterOnScreen('pictures/biblio/add_address.PNG', confidence = 0.8)
+    #pyautogui.moveTo(biblio_add_address_x, biblio_add_address_y)
+    #pyautogui.click(biblio_add_address_x, biblio_add_address_y)
     conn.close()
-
 
 root.update_idletasks()
 conn.commit()
