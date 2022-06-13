@@ -253,12 +253,6 @@ def get_abe_API_neworders(): #Connects to Abe api, gets new orders, puts them in
     print(len(new_used))
     print(len(titles))
 
-
-
-
-
-
-
     #for zip in codes:
     #    labelNumberOfOrders = Label(text=zip, font=('bold', 2))
     #    labelNumberOfOrders
@@ -371,6 +365,7 @@ for count, record in enumerate(records):
     #weight = get_weight(obj_order)
     #print(obj_order)
 
+    #if bad buyer found, change color
     if obj_email in badpeople.bad_buyers:
         bad_buyer_color = "#FF808F"
     else:
@@ -384,16 +379,20 @@ for count, record in enumerate(records):
     process_biblio['font'] = f
     process_biblio.grid(row=row, column=1, sticky='w')
 
+    process_amz = Button(root, text = 'AMZ', command = lambda x=obj_order: process_from_AMAZON(x), bg = '#FFD09A')
+    process_amz['font'] = f
+    process_amz.grid(row=row, column=2, sticky='w')
+
     if obj_condition == 'used':
         condition = Label(root, text=obj_condition, foreground='#FF8700', bg=bad_buyer_color)
     else:
         condition = Label(root, text=obj_condition, bg=bad_buyer_color)
     condition['font'] = f
-    condition.grid(row=row, column=2, sticky='w')
+    condition.grid(row=row, column=3, sticky='w')
 
     title = Label(root, text=obj_title, bg='#9FD996')
     title['font'] = f
-    title.grid(sticky='w', row=row, column=3)
+    title.grid(sticky='w', row=row, column=4)
 
     #name = Label(root, text=obj_name, bg='#9FD996')
     #name['font'] = f
@@ -406,7 +405,7 @@ for count, record in enumerate(records):
     #obj_weight1 = re.findall(r"(?<=Weight: )\d+[.]\d+ \w+", obj_weight)
     weight = Label(root, text=obj_weight, bg='#9FD996')
     weight['font'] = f
-    weight.grid(sticky='w', row=row, column=4)
+    weight.grid(sticky='w', row=row, column=5)
 
     r1 = Radiobutton(root, text=obj_email, value=0, variable=1)
     r2 = Radiobutton()
@@ -421,6 +420,94 @@ def open_biblio_url(x):
     url = urllib.parse.quote(url1)
     webbrowser.open_new("http://api.scrape.do?token=9c904d30b8d747ee93dcfe615ac0552e0cb72ba2d82&url=" + url)
 
+def process_from_AMAZON(x):
+    conn = sqlite3.connect('orders_database.db')
+    df = pd.read_sql(f"SELECT * FROM new_orders WHERE ABEPOID is {x}", con = conn)
+    amz_abepoid = df.iloc[0]['ABEPOID']
+    amz_ship_to_name = df.iloc[0]['SHIPTONAME']+" {NO INVOICE}"
+    amz_ship_to_address = df.iloc[0]['SHIPTOADDRESS']
+    amz_ship_to_address2 = df.iloc[0]['SHIPTOADDRESS2']
+    amz_ship_to_city = df.iloc[0]['SHIPTOCITY']
+    amz_ship_to_state = df.iloc[0]['SHIPTOPROVSTATE']
+    amz_ship_to_zip = df.iloc[0]['SHIPTOZIPCODE']
+    amz_ship_to_country = df.iloc[0]['SHIPTOCOUNTRY']
+    if amz_ship_to_address2 == None:
+        amz_ship_to_address2 = ''
+
+    # if order going to IDS
+    if amz_ship_to_country != 'U.S.A.':
+        amz_ship_to_name = "IDS IRISH " + amz_abepoid
+        amz_ship_to_address =  '7340 S Howell Ave, Unit 5'
+        amz_ship_to_address2 = 'BOX ' + amz_abepoid
+        amz_ship_to_city = 'Oak Creek'
+        amz_ship_to_state = 'WI'
+        amz_ship_to_zip = '53154-7486'
+
+    #time.sleep(1)
+    #pyautogui.press("f")
+    #pyautogui.press("j")
+    pyautogui.click(x = 200, y = 200)
+
+    time.sleep(1)
+    pyautogui.press("f")
+    time.sleep(1)
+    pyautogui.press('a')
+    time.sleep(2)
+    pyautogui.press("f")
+    time.sleep(1)
+    pyautogui.press("a")
+    pyautogui.press("j")
+    time.sleep(2)
+    pyautogui.hotkey('ctrl', 'a')
+
+    try:
+        pyautogui.write(amz_ship_to_name)
+    except:
+        pass
+    time.sleep(1)
+    pyautogui.hotkey("tab")
+    time.sleep(1)
+    pyautogui.hotkey("tab")
+    time.sleep(1)
+    pyautogui.hotkey("tab")
+    time.sleep(1)
+    try:
+        pyautogui.write(amz_ship_to_address)
+    except:
+        pass
+    time.sleep(1)
+    pyautogui.hotkey("tab")
+    try:
+        pyautogui.write(amz_ship_to_address2)
+    except:
+        pass
+    time.sleep(1)
+    pyautogui.hotkey("tab")
+    try:
+        pyautogui.write(amz_ship_to_city)
+    except:
+        pass
+    time.sleep(1)
+    pyautogui.hotkey("tab")
+    try:
+        pyautogui.press('down')
+        time.sleep(1)
+        pyautogui.write('w')
+        time.sleep(0.5)
+        pyautogui.write('1')
+        time.sleep(1)
+        pyautogui.press('return')
+
+    except:
+        pass
+    time.sleep(1)
+    pyautogui.hotkey("tab")
+    try:
+        pyautogui.write(amz_ship_to_zip)
+    except:
+        pass
+
+
 def process_from_BIBLIO(x):
     conn = sqlite3.connect('orders_database.db')
 
@@ -433,12 +520,27 @@ def process_from_BIBLIO(x):
     biblio_ship_to_state = df.iloc[0]['SHIPTOPROVSTATE']
     biblio_ship_to_zip = df.iloc[0]['SHIPTOZIPCODE']
     biblio_ship_to_country = df.iloc[0]['SHIPTOCOUNTRY']
+    if biblio_ship_to_address2 == None:
+        biblio_ship_to_address2 = ''
 
     #print(badpeople.states[f"{biblio_ship_to_state}"])
 
-
+    # if order going to IDS
+    if biblio_ship_to_country != 'U.S.A.':
+        biblio_ship_to_name = "IDS IRISH " + biblio_abepoid
+        biblio_ship_to_address =  '7340 S Howell Ave, Unit 5'
+        biblio_ship_to_address2 = 'BOX ' + biblio_abepoid
+        biblio_ship_to_city = 'Oak Creek'
+        biblio_ship_to_state = 'WI'
+        biblio_ship_to_zip = '53154-7486'
+    print(biblio_ship_to_name)
+    print(biblio_ship_to_address)
+    print(biblio_ship_to_address2)
+    print(biblio_ship_to_city)
     print(biblio_ship_to_state)
-    print(type(biblio_ship_to_state))
+    print(biblio_ship_to_zip)
+    print(biblio_abepoid)
+
     biblio_checkout_x, biblio_checkout_y = pyautogui.locateCenterOnScreen('pictures/biblio/proceed_to_checkout.PNG', confidence = 0.8)
     pyautogui.moveTo(biblio_checkout_x-20, biblio_checkout_y)
     pyautogui.click()

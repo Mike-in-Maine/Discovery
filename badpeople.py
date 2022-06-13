@@ -6,7 +6,8 @@ bad_buyers = [
     'alhpreston@gmail.com',
     'info@books.lk',
     'irvscr@comcast.net',
-    'madergj@gmail.com' #NOT BLACKLISTED for testing only.
+    'id2359@yahoo.com',
+    '' #NOT BLACKLISTED for testing only.
 ]
 
 bad_countries = [
@@ -19,6 +20,7 @@ bad_countries = [
 
 bad_sellers = [
     'Ergodebooks',
+    'ErgodeBooks',
     'Ergode',
     'Book_Outpost',
     'worldofbooksinc',
@@ -52,6 +54,9 @@ bad_titles = [
     'Books 1-7', #or any other number Regex
     'Connect Access Card',
     'Printed Access Card',
+    'Digital Card',
+    'Digital Cards',
+    'Digital code'
     'Access Card',
     'Access Key',
     'CD',
