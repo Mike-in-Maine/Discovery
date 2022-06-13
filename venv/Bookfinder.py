@@ -9,7 +9,7 @@ import urllib.parse
 from urllib.parse import urlparse
 from datetime import datetime
 from fake_useragent import UserAgent
-
+user = UserAgent.load()
 conn3 = sqlite3.connect('sellers.db')
 
 
