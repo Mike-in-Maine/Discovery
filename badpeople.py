@@ -7,6 +7,7 @@ bad_buyers = [
     'info@books.lk',
     'irvscr@comcast.net',
     'id2359@yahoo.com',
+    'abebooks.black@ergoder.com'
     '' #NOT BLACKLISTED for testing only.
 ]
 
