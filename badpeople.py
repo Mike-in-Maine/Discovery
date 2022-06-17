@@ -49,6 +49,9 @@ bad_titles = [
     'Set',
     'SET',
     'Volume',
+    'Bible',
+    'KJV',
+    'NIV',
     'VOLUME',
     'Volumes',
     'VOLUMES',
@@ -76,13 +79,17 @@ bad_titles = [
     'femminism',
     'femminist',
     'gay',
-    'Large Print'
+    'Large Print',
+    '(Signature',
+    'Signed',
+    'signed'
 
 
 ]
 
 bad_publishers = [
     'Brilliance Audio'
+    'Blackstone Publishing'
 ]
 
 bad_isbns = [
