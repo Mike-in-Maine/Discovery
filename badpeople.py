@@ -82,7 +82,8 @@ bad_titles = [
     'Large Print',
     '(Signature',
     'Signed',
-    'signed'
+    'signed',
+    'kit'
 
 
 ]
