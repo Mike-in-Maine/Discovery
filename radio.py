@@ -506,8 +506,6 @@ def process_from_AMAZON(x):
         pyautogui.write(amz_ship_to_zip)
     except:
         pass
-
-
 def process_from_BIBLIO(x):
     conn = sqlite3.connect('orders_database.db')
 
