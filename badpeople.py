@@ -83,7 +83,8 @@ bad_titles = [
     '(Signature',
     'Signed',
     'signed',
-    'kit'
+    'kit',
+    'Encyclopedia'
 
 
 ]
