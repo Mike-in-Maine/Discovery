@@ -45,6 +45,8 @@ bad_titles = [
     'TRILOGY',
     'boxed',
     'Boxed',
+    'Boxset',
+    'boxset',
     'set',
     'Set',
     'SET',
@@ -84,9 +86,8 @@ bad_titles = [
     'Signed',
     'signed',
     'kit',
-    'Encyclopedia'
-
-
+    'Encyclopedia',
+    'Teacher'
 ]
 
 bad_publishers = [
