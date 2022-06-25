@@ -598,7 +598,8 @@ def process_from_BIBLIO(x):
     #pyautogui.write("k")
     #biblio_add_address_x, biblio_add_address_y = pyautogui.locateCenterOnScreen('pictures/biblio/add_address.PNG', confidence = 0.8)
     #pyautogui.moveTo(biblio_add_address_x, biblio_add_address_y)
-    #pyautogui.click(biblio_add_address_x, biblio_add_address_y)
+    #pyautogui.click(biblio_add_address_x,
+    # biblio_add_address_y)
     conn.close()
 
 root.update_idletasks()

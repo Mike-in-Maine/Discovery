@@ -91,8 +91,9 @@ bad_titles = [
 ]
 
 bad_publishers = [
-    'Brilliance Audio'
-    'Blackstone Publishing'
+    'Brilliance Audio',
+    'Blackstone Publishing',
+    'Simon & Schuster Audio'
 ]
 
 bad_isbns = [
