@@ -7,7 +7,9 @@ bad_buyers = [
     'info@books.lk',
     'irvscr@comcast.net',
     'id2359@yahoo.com',
-    'abebooks.black@ergoder.com'
+    'abebooks.black@ergoder.com',
+    'ferpat135@aol.com'
+    'skeptic2@hotmail.com'
     '' #NOT BLACKLISTED for testing only.
 ]
 
@@ -37,7 +39,8 @@ bad_sellers = [
     'belles-books',
     'COOLCAT 11',
     'booksalexpress',
-    '* Ultimate Treasures *'
+    '* Ultimate Treasures *',
+    'swati21'
 ]
 
 bad_titles = [
@@ -154,4 +157,4 @@ states = {
     'WV': 'West Virginia',
     'WY': 'Wyoming'
 }
-print(states["VA"])
+print(states["TX"])
