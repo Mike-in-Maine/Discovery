@@ -16,7 +16,7 @@ conn3 = sqlite3.connect('sellers.db')
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', None)
-x = '0873481291'
+x = '0147509181'
 #url1 = f"https://www.bookfinder.com/search/?keywords={x}&currency=USD&destination=us&mode=basic&classic=off&ps=tp&lang=en&st=sh&ac=qr&submit="
 #url1 = 'https://www.bookfinder.com/search/?author=&title=&lang=en&new_used=*&destination=us&currency=USD&binding=*&isbn=0810914220&keywords=0810914220&minprice=&maxprice=&publisher=&min_year=&max_year=&mode=advanced&st=sr&ac=qr'
 #f'https://www.bookfinder.com/search/?keywords={x}&currency=USD&destination=us&mode=basic&classic=off&ps=tp&lang=en&st=sh&ac=qr&submit='
@@ -34,35 +34,51 @@ soup = bs(page2, 'lxml')
 prices = []
 sellers = []
 titles = []
+marketplace = []
 
-prices_bs = soup.find_all(attrs={'class':'results-price'})
-sellers_bs = soup.find_all(attrs={'class':'results-explanatory-text-Logo'})
+tables = soup.find_all(attrs={"class": "results-table-Logo"}) #Finds the 2 tables new and used
+marketplace_used = str(tables[1])
+#print(marketplace_used)
+marketplace_new = str(tables[0])
+#print(marketplace_new)
 
-marketplaces_bs = soup.find_all('img') #find_all('img')
+prices_bs = tables[1].find_all(attrs={'class':'results-price'})
+#print(prices_bs)
+sellers_bs = tables[1].find_all(attrs={'class':'results-explanatory-text-Logo'})
+
+marketplaces_bs = (tables[1]).find_all('img', alt=True)
+for foo in marketplaces_bs:
+   marketplace.append(foo["alt"])
 
 for price in prices_bs:
     item = price.get_text()
     prices.append(item)
+print(prices)
 
 for seller in sellers_bs[0::3]:
     item2 = seller.get_text()
     sellers.append(item2)
 
+for market in tables:
+    marketplace.append(market)
+print(marketplace)
+
 for title in marketplaces_bs[2:]: #The first 2 are not sellers
     titles.append(title.get('title'))
 
-print(prices) #These are new and used
-print(titles)
-print(sellers)
+
+#print(prices) #These are new and used
+#print(titles)
+#print(sellers)
 
 #sellers = soup.find(attrs={"class": "results-explanatory-text-Logo"})
 print('prices', len(prices))
 print('sellers', len(titles))
-print('titles', len(sellers))
+print('marketplaces', len(marketplace))
 
-dict = {'Marketplaces': titles, 'Sellers': sellers, 'Prices': prices}
+dict = {'Marketplaces': titles, 'Sellers': marketplace, 'Prices': prices}
 df = pd.DataFrame(dict)
-print(df)
+#print(df)
 df.to_sql(name='sellers_df', con=conn3, index=False, if_exists='replace')
 
 
@@ -72,11 +88,21 @@ df.to_sql(name='sellers_df', con=conn3, index=False, if_exists='replace')
 ###________ This entire part tries to get data by reading an html with pandas and it doesnt work well
 tables = soup.find_all(attrs={"class": "results-table-Logo"})
 
-print(tables)
-#print(len(tables))
+#print("first",tables[1])
+#marketplace_used = pd.read_html(str(tables[1]))
+#marketplace_new = pd.read_html(str(tables[0]))
+#print(type(marketplace_new))
+#print("NEWWWWWWWWW:", marketplace_new[0])
+#print("USEDDDDDDDD:",marketplace_used)
+
+df2_new = marketplace_new[0]
+df2_new.to_sql(name='sellers_db', con=conn3, index=False, if_exists='replace')
+
+#print(marketplace_new)
+#print(type(marketplace_new[0]))#This is a dataframe not a list
+#print(len(marketplace_used))#This is a list of dataframes
 #print(type(tables))
 #sellers_bs = soup.find_all(attrs={'class':'results-explanatory-text-Logo'})
-
 
 #for title in marketplaces_bs[2:]: #The first 2 are not sellers
     #titles.append(title.get('title'))
@@ -84,8 +110,8 @@ print(tables)
 
 df_tables = []
 for table in tables:
+    print (table.text)
     marketplaces_used = table.text
-    print(type(marketplaces_used))
     #marketplaces_used = table.findAll("img", {"title": regex.compile(r".*")})
     print('Marketplaces used', marketplaces_used)
 
