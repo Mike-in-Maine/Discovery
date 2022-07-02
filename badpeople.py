@@ -10,6 +10,10 @@ bad_buyers = [
     'abebooks.black@ergoder.com',
     'ferpat135@aol.com'
     'skeptic2@hotmail.com'
+    'onemore.book1@btinternet.com',
+    'novaraen@gmail.com',
+    'geremiaalto93@gmail.com',
+    'yfhua@ntu.edu.tw'
     '' #NOT BLACKLISTED for testing only.
 ]
 
@@ -85,12 +89,14 @@ bad_titles = [
     'femminist',
     'gay',
     'Large Print',
-    '(Signature',
+    'Signature',
     'Signed',
     'signed',
     'kit',
     'Encyclopedia',
-    'Teacher'
+    'Teacher',
+    'vText',
+    'WebSAM Code'
 ]
 
 bad_publishers = [
