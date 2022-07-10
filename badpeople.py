@@ -1,5 +1,6 @@
 bad_buyers = [
     'jp.podly@gmail.com',
+    'rosanamiranda@usp.br',
     'notspicedham@yahoo.com',
     'bethnpatterson@gmail.com',
     'jeracafite@gmail.com',
@@ -8,6 +9,7 @@ bad_buyers = [
     'irvscr@comcast.net',
     'id2359@yahoo.com',
     'abebooks.black@ergoder.com',
+    'ABE.Buy.Alpha@ergoder.com',
     'ferpat135@aol.com'
     'skeptic2@hotmail.com'
     'onemore.book1@btinternet.com',
@@ -73,11 +75,11 @@ bad_titles = [
     'Access Card',
     'Access Key',
     'CD',
-    'CD-ROM'
-    'CD ROM'
+    'CD-ROM',
+    'CD ROM',
     'DVD',
-    'DVD-ROM'
-    'DVD ROM'
+    'DVD-ROM',
+    'DVD ROM',
     'Card set',
     'Cards',
     'transexual',
@@ -85,9 +87,15 @@ bad_titles = [
     'racist',
     'black lives matter',
     'negro',
+    'bundle',
+    'book bundle',
     'femminism',
+    "feminism",
     'femminist',
+    'feminist',
     'gay',
+    'lesbian',
+    'lesbians',
     'Large Print',
     'Signature',
     'Signed',
@@ -95,8 +103,13 @@ bad_titles = [
     'kit',
     'Encyclopedia',
     'Teacher',
+    'teacher\'s',
     'vText',
-    'WebSAM Code'
+    'WebSAM Code',
+    'Drag Queens',
+    'drag queen',
+    'dragqueen',
+    'dragqueens'
 ]
 
 bad_publishers = [
