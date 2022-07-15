@@ -41,6 +41,7 @@ marketplace_used = str(tables[1])
 #print(marketplace_used)
 marketplace_new = str(tables[0])
 #print(marketplace_new)
+#print(len(marketplace_new))
 
 prices_bs = tables[1].find_all(attrs={'class':'results-price'})
 #print(prices_bs)
@@ -49,27 +50,29 @@ sellers_bs = tables[1].find_all(attrs={'class':'results-explanatory-text-Logo'})
 marketplaces_bs = (tables[1]).find_all('img', alt=True)
 for foo in marketplaces_bs:
    marketplace.append(foo["alt"])
+   print(foo)
 
 for price in prices_bs:
     item = price.get_text()
     prices.append(item)
-print(prices)
+#print(prices)
 
-for seller in sellers_bs[0::3]:
+for seller in sellers_bs[0::3]: #this notion is wrong and breaks at TextBookX
     item2 = seller.get_text()
     sellers.append(item2)
+    print(seller)
 
 for market in tables:
     marketplace.append(market)
-print(marketplace)
+#print(marketplace)
 
 for title in marketplaces_bs[2:]: #The first 2 are not sellers
     titles.append(title.get('title'))
 
 
-#print(prices) #These are new and used
-#print(titles)
-#print(sellers)
+print(prices) #These are new and used
+print(titles)
+print(sellers)
 
 #sellers = soup.find(attrs={"class": "results-explanatory-text-Logo"})
 print('prices', len(prices))
@@ -110,13 +113,13 @@ df2_new.to_sql(name='sellers_db', con=conn3, index=False, if_exists='replace')
 
 df_tables = []
 for table in tables:
-    print (table.text)
+    #print (table.text)
     marketplaces_used = table.text
     #marketplaces_used = table.findAll("img", {"title": regex.compile(r".*")})
     print('Marketplaces used', marketplaces_used)
 
     df_count_tables = pd.read_html(table_html)
-    print(df_count_tables)
+    #print(df_count_tables)
     df_count_tables.insert(5, 'ISBN', x)# inserts the ISBN column
     df_count_tables.insert(6, 'CONDITION', 'new')
     df_count_tables.insert(7, 'TIMESTAMP', datetime.today())

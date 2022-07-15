@@ -10,12 +10,14 @@ bad_buyers = [
     'id2359@yahoo.com',
     'abebooks.black@ergoder.com',
     'ABE.Buy.Alpha@ergoder.com',
-    'ferpat135@aol.com'
-    'skeptic2@hotmail.com'
+    'ferpat135@aol.com',
+    'skeptic2@hotmail.com',
     'onemore.book1@btinternet.com',
     'novaraen@gmail.com',
     'geremiaalto93@gmail.com',
-    'yfhua@ntu.edu.tw'
+    'yfhua@ntu.edu.tw',
+    'ulrichweinfurtner@gmx.de',
+    'lut.sommerijns@skynet.be'
     '' #NOT BLACKLISTED for testing only.
 ]
 
@@ -56,6 +58,10 @@ bad_titles = [
     'Boxed',
     'Boxset',
     'boxset',
+    'volume set',
+    'spiralbound',
+    'spiral bound',
+    'spiral-bound',
     'set',
     'Set',
     'SET',
@@ -95,6 +101,7 @@ bad_titles = [
     'feminist',
     'gay',
     'lesbian',
+    'homosexuality',
     'lesbians',
     'Large Print',
     'Signature',
@@ -115,7 +122,8 @@ bad_titles = [
 bad_publishers = [
     'Brilliance Audio',
     'Blackstone Publishing',
-    'Simon & Schuster Audio'
+    'Simon & Schuster Audio',
+    'Neal A. Maxwell Institute for Religious Scholarship'
 ]
 
 bad_isbns = [
