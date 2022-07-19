@@ -96,7 +96,7 @@ bad_titles = [
     'bundle',
     'book bundle',
     'femminism',
-    "feminism",
+    'feminism',
     'femminist',
     'feminist',
     'gay',
@@ -116,7 +116,13 @@ bad_titles = [
     'Drag Queens',
     'drag queen',
     'dragqueen',
-    'dragqueens'
+    'dragqueens',
+    'STUDENT EDITION',
+    'student edition',
+    'TEACHER EDITION',
+    'teacher edition',
+    'Teacher\'s edition',
+    'Student\'s Edition'
 ]
 
 bad_publishers = [
